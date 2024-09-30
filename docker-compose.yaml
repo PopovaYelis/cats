@@ -1,6 +1,5 @@
-version: '3'
 services:
-  hw:
+  cats:
     container_name: fast_api_app
     build: .
     ports:

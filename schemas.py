@@ -3,12 +3,15 @@ from typing import Optional
 from pydantic import BaseModel
 
 class BaseBreed(BaseModel):
-    breed_name: str
+    name: str
 
+class BaseBreedOut(BaseBreed):
+    class Config:
+        orm_mode = True
 
 class BaseCatShort(BaseModel):
     cat_name: str
-    age: str
+    age: int
 
 class BaseCatLong(BaseCatShort):
     color: str
