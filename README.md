@@ -10,7 +10,7 @@
 2. Взаимодействие с БД реализовано через orm SQLAlchemy
 3. База данных postgresql
 4. Приложение обернуто в Dockerfile
-5. Для быстрого запуска с docker compose up обернуто в Docker-compose.yaml, 
+5. Для быстрого запуска командлй {docker compose up} приложение обернуто в Docker-compose.yaml, 
 
 
 ### Описание роутов и взаимодействие с ними через SWAGGER
