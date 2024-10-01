@@ -2,8 +2,8 @@ import time
 from http.client import HTTPException
 
 from fastapi import APIRouter, FastAPI
-
-from schemas import BaseBreed, BaseCatShort, BaseCatLong, CatIn, CatOutLong, CatOutShort, BaseBreedOut
+from sqlalchemy import delete, update
+from schemas import BaseBreed, CatIn, CatOutLong, CatOutShort, BaseBreedOut, UpdateCat
 from typing import List
 from database import engine, session
 from models import Cats, Breed, Base
@@ -42,7 +42,7 @@ async def post_breed(breed: BaseBreed):
 async def get_cat_bred(bread_name):
     async with session.begin():
         res = await session.execute(
-            select(Cats).where(Cats.breed.name == bread_name))
+            select(Cats).where(Cats.breed.has(Breed.name == bread_name)))
     return res.scalars().all()
 
 @router.get("/cats", response_model=List[CatOutShort])
@@ -52,8 +52,8 @@ async def get_cats():
             select(Cats))
     return res.scalars().all()
 
-@router.get("/cats/{cat_id}", response_model=CatOutLong)
-async def get_cat_id(cat_id):
+@router.get("/cats/one/{cat_id}", response_model=CatOutLong)
+async def get_cat_id(cat_id: int):
     async with session.begin():
         res = await session.execute(
             select(Cats).where(Cats.id == cat_id))
@@ -69,26 +69,23 @@ async def post_route(cat: CatIn):
 
 
 @router.patch("/cats/{cat_id}", response_model=CatOutLong)
-async def update_cat(cat_id: int, cat_update: CatIn):
-    existing_cat = await session.query(Cats).filter(Cats.id == cat_id).first()
+async def update_cat(cat_id: int, cat_update: UpdateCat):
+    async with session.begin():
+        res = await session.execute(
+            select(Cats).where(Cats.id == cat_id))
+    existing_cat = res.scalar()
     if existing_cat is None:
         raise HTTPException(status_code=404, detail="Cat not found")
-
-    # Обновление данных о коте
-    for field, value in cat_update.dict(exclude_unset=True).items():
-        setattr(existing_cat, field, value)
-
-    # Сохранение изменений
     async with session.begin():
-        session.add(existing_cat)
-
+        for field, value in cat_update.dict(exclude_unset=True).items():
+            setattr(existing_cat, field, value)
     return existing_cat
 
-
-@router.delete("/cats")
-async def delete_route(cat_id):
+@router.delete("/cats/{cat_id}")
+async def delete_route(cat_id: int):
     async with session.begin():
-        await session.query(Cats).filter(Cats.id == cat_id).delete()
+        await session.execute(
+            delete(Cats).where(Cats.id == cat_id))
     return "SUCCESS", 200
 
 

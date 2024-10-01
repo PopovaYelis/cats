@@ -16,7 +16,7 @@ class BaseCatShort(BaseModel):
 class BaseCatLong(BaseCatShort):
     color: str
     description: str
-    breed_id: Optional[int]
+    breed_id: int
 
 
 class CatIn(BaseCatLong):
@@ -32,3 +32,11 @@ class CatOutLong(BaseCatLong):
 
     class Config:
         orm_mode = True
+
+class UpdateCat(BaseModel):
+    cat_name: Optional[str]
+    age: Optional[int]
+    color: Optional[str]
+    description: Optional[str]
+    breed_id: Optional[int]
+
